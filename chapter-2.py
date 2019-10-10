@@ -50,12 +50,10 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
         b_values.append('{0:.1f}'.format(b))
         b += b_increment
 
-    # Plotting code
+    # Matplotlib fun
     plt.style.use('seaborn-darkgrid')
     plt.tight_layout()
 
-    palette = plt.get_cmap('Set1')
-    print(results.keys())
     plt_num = 0  # keeps track of our current plot
     for column in results.drop('x', axis=1):
         plt_num += 1
@@ -69,9 +67,13 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
             alpha=0.9, label=b_values[plt_num - 1]
         )
 
+        # Make sure the limits are the same across each graph
+        largest_value = int(results.values.max())
+        largest_value -= largest_value % -100  # modulo hack to round up to nearest 100
+        plt.ylim(0, largest_value)
         plt.xlim(0, time_to_run)
-        plt.ylim(0, 1000)
 
+        # finally sort the labels out
         plt.title(b_values[plt_num - 1], loc='left', fontsize=12, fontweight=0)
         plt.xlabel("time")
         plt.ylabel("pop")
