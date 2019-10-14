@@ -1,29 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 import pandas as pd
 
-def bacteria_exp_growth(init_pop=2, growth_factor=12, delta_time=8):
-    """
-    P(t) = P(0)e*rt
-    or dP/dt = rP as differential equation
-    where
-    P is the initial population size
-    r is the growth rate
-    and t is time
-
-    Bacteria is growing exponentially in a vessel by a factor of 12 in 8 hours.
-    Calculate growth parameter r and the time required for the population to grow
-    by a factor of a million.
-    """
-
-    # dP / dt = rP
-    #
-    # rP = dP * dt
-    # rP / P = (dP * dt) / P
-    # r = (dP * dt) / P
-    growth_parameter = ((init_pop * growth_factor) * delta_time) / init_pop
-    return growth_parameter
 
 
 def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2, time_to_run=50):
@@ -50,7 +28,7 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
         b_values.append('{0:.1f}'.format(b))
         b += b_increment
 
-    # Matplotlib fun
+    # Matplotlib setup
     plt.style.use('seaborn-darkgrid')
     plt.tight_layout()
 
