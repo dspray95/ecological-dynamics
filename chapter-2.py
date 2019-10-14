@@ -3,6 +3,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+def exponential_growth(init_pop=2, growth_factor=12, t=8):
+    """
+    p(0) = exp(r) * p(t)
+    r = ln(p(t)) - ln(p(0)/t
+    r = ln(p(0) * 12 - ln(p(0))/t
+    :return:
+    """
+    pop_t = growth_factor * t
+    r = (np.log(pop_t) - np.log(init_pop))/t
+    print("r value is: {}".format(r))
+    grow_by_one_million = np.log(1000000)/r
+    print("time to grow by a factor of one million: {}".format(grow_by_one_million))
+
 
 def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2, time_to_run=50):
     """
@@ -60,4 +73,5 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
 
 
 if __name__ == "__main__":
+    exponential_growth()
     logistic_map()
