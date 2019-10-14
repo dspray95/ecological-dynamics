@@ -60,6 +60,4 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
 
 
 if __name__ == "__main__":
-    print("q1, exp pop growth r value: {}".format(bacteria_exp_growth()))
-
     logistic_map()
