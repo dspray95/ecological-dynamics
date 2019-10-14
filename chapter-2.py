@@ -3,21 +3,21 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def exponential_growth(init_pop=2, growth_factor=12, t=8):
+def one_exponential_growth(init_pop=2, growth_factor=12, time=8):
     """
     p(0) = exp(r) * p(t)
     r = ln(p(t)) - ln(p(0)/t
     r = ln(p(0) * 12 - ln(p(0))/t
     :return:
     """
-    pop_t = growth_factor * t
-    r = (np.log(pop_t) - np.log(init_pop))/t
+    pop_t = growth_factor * time
+    r = (np.log(pop_t) - np.log(init_pop)) / time
     print("r value is: {}".format(r))
     grow_by_one_million = np.log(1000000)/r
     print("time to grow by a factor of one million: {}".format(grow_by_one_million))
 
 
-def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2, time_to_run=50):
+def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0.2, time_to_run=50):
     """
     nt+1 = bnt(1-cnt)
 
@@ -36,7 +36,7 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
             next_pop = (b * current_pop) * (1 - c * current_pop)  # Actual equation here
             pop_history.append(next_pop)
             current_pop = next_pop
-        results['{0:.1f}'.format(b)] = pop_history
+        results['{0:.1f}'.format(b)] = pop_history  # Formatting here is just cutting b off after one decimal place
 
         b_values.append('{0:.1f}'.format(b))
         b += b_increment
@@ -72,6 +72,11 @@ def logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment = 0.2
     plt.show()
 
 
+def three_lake_toxicant():
+
+    pass
+
+
 if __name__ == "__main__":
-    exponential_growth()
-    logistic_map()
+    one_exponential_growth()
+    two_logistic_map()
