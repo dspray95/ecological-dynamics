@@ -72,27 +72,51 @@ def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0
     plt.show()
 
 
-def mussel_model(init_pop=20, I=2, S=0.001, time_to_run=50):
+def mussel_model(init_pop=2, recruitment=2, survival_rate=0.4, time_to_run=50):
+    """
+    Consider a mussel model in a fluctuating environment:
+        X(t+1) = I(t) + S * X(t)
+    where recruitment only occurs every second year so that:
+        I(t) = 2I   if t is even
+        I(t) = 0    if t is odd
+
+    Prove that after any transient dynamics , the system ultimately executes two year cycles
+    with:
+        X(t) = 2IS/1-S^2    if t is even
+        X(t) = 2I / 1-S^2   if t is odd
+
+    :param init_pop: X(0), the starting population of the model
+    :param recruitment: I(0), the recruitment to occur
+    :param survival_rate: S, a small constant proportion of the population that survives
+    :param time_to_run: max(t), the amount of time from 0 the model is to run
+    """
 
     pop_history = []
     current_pop = init_pop
     pop_history.append(current_pop)
+
     for t in range(1, time_to_run):
+        # Here we calculate the recruitment value based on whether t is odd or even
+        # Additionally, we also calculate what the population should be based on the two
+        # year cycle shown above
         if t % 2 == 0:
-            current_I = 2 * I
-            cycle = 2 * I * S / 1 - math.pow(S, 2)
+            current_recruitment = 2 * recruitment
+            cycle = (2 * recruitment * survival_rate) / (1 - math.pow(survival_rate, 2))
         else:
-            current_I = 0
-            cycle = 2 * I / 1 - math.pow(S, 2)
+            current_recruitment = 0
+            cycle = (2 * recruitment) / (1 - math.pow(survival_rate, 2))
 
-        next_pop = current_I + S * current_pop
+        # This is the fluctuating environmnet calculation X(t+1) = I(t) + S * X(t)
+        current_pop = current_recruitment + survival_rate * current_pop
 
-        current_pop = next_pop
         pop_history.append(current_pop)
-
-        non_float_pop = round(current_pop)
-        non_float_cycle = round(cycle)
+        non_float_pop = round(current_pop, 2)
+        non_float_cycle = round(cycle, 2)
         print("current_pop: {}, cycle: {}".format(non_float_pop, non_float_cycle))
+
+    # Matplotlib work
+    plt.style.use('seaborn-darkgrid')
+    plt.tight_layout()
 
     plt.plot(
         range(0, time_to_run),
