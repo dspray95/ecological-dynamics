@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-
+import math
 
 def one_exponential_growth(init_pop=2, growth_factor=12, time=8):
     """
@@ -72,11 +72,43 @@ def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0
     plt.show()
 
 
-def three_lake_toxicant():
+def mussel_model(init_pop=20, I=2, S=0.001, time_to_run=50):
 
-    pass
+    pop_history = []
+    current_pop = init_pop
+    pop_history.append(current_pop)
+    for t in range(1, time_to_run):
+        if t % 2 == 0:
+            current_I = 2 * I
+            cycle = 2 * I * S / 1 - math.pow(S, 2)
+        else:
+            current_I = 0
+            cycle = 2 * I / 1 - math.pow(S, 2)
+
+        next_pop = current_I + S * current_pop
+
+        current_pop = next_pop
+        pop_history.append(current_pop)
+
+        non_float_pop = round(current_pop)
+        non_float_cycle = round(cycle)
+        print("current_pop: {}, cycle: {}".format(non_float_pop, non_float_cycle))
+
+    plt.plot(
+        range(0, time_to_run),
+        pop_history,
+        marker='',
+        linewidth=1,
+        alpha=0.9
+    )
+
+    plt.title("mussel model")
+    plt.xlabel("time")
+    plt.ylabel("pop")
+    plt.show()
 
 
 if __name__ == "__main__":
-    one_exponential_growth()
-    two_logistic_map()
+    # one_exponential_growth()
+    # two_logistic_map()
+    mussel_model()
