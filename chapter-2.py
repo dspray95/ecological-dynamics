@@ -72,14 +72,13 @@ def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0
     plt.show()
 
 
-def mussel_model(init_pop=2, recruitment=2, survival_rate=0.4, time_to_run=50):
+def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_run=50):
     """
     Consider a mussel model in a fluctuating environment:
         X(t+1) = I(t) + S * X(t)
     where recruitment only occurs every second year so that:
         I(t) = 2I   if t is even
         I(t) = 0    if t is odd
-
     Prove that after any transient dynamics , the system ultimately executes two year cycles
     with:
         X(t) = 2IS/1-S^2    if t is even
@@ -92,10 +91,10 @@ def mussel_model(init_pop=2, recruitment=2, survival_rate=0.4, time_to_run=50):
     """
 
     pop_history = []
+    cycle_history = []
     current_pop = init_pop
-    pop_history.append(current_pop)
 
-    for t in range(1, time_to_run):
+    for t in range(0, time_to_run):
         # Here we calculate the recruitment value based on whether t is odd or even
         # Additionally, we also calculate what the population should be based on the two
         # year cycle shown above
@@ -106,13 +105,89 @@ def mussel_model(init_pop=2, recruitment=2, survival_rate=0.4, time_to_run=50):
             current_recruitment = 0
             cycle = (2 * recruitment) / (1 - math.pow(survival_rate, 2))
 
-        # This is the fluctuating environmnet calculation X(t+1) = I(t) + S * X(t)
+        # This is the fluctuating environment calculation X(t+1) = I(t) + S * X(t)
         current_pop = current_recruitment + survival_rate * current_pop
 
         pop_history.append(current_pop)
+        cycle_history.append(cycle)
         non_float_pop = round(current_pop, 2)
         non_float_cycle = round(cycle, 2)
         print("current_pop: {}, cycle: {}".format(non_float_pop, non_float_cycle))
+
+    # Matplotlib work
+    plt.style.use('seaborn-darkgrid')
+    plt.tight_layout()
+
+    plt.plot(
+        range(0, time_to_run),
+        pop_history,
+        marker='',
+        linewidth=1,
+        alpha=0.9
+    )
+
+    plt.title("mussel model")
+    plt.xlabel("time")
+    plt.ylabel("pop")
+    plt.show()
+
+    # plt.plot(
+    #     range(0, time_to_run),
+    #     cycle_history,
+    #     marker='',
+    #     linewidth=1,
+    #     alpha=0.9
+    # )
+    # plt.title("cycles")
+    # plt.xlabel("time")
+    # plt.ylabel("cycle")
+    # plt.show()
+
+
+def project_continuous_time_logistic_model(init_pop=400, time_to_run=50, r=0.4, k=300):
+    """
+    dN/dt = rN(1-N/K)
+    N(t+1) = Nt + dN/dt
+           = Nt + rN(1 - N/K)
+    """
+    current_pop = init_pop
+    pop_history = []
+    for i in range(0, time_to_run):
+        current_pop = current_pop + r * current_pop * (1 - current_pop/k)
+        pop_history.append(current_pop)
+
+    # Matplotlib work
+    plt.style.use('seaborn-darkgrid')
+    plt.tight_layout()
+
+    plt.plot(
+        range(0, time_to_run),
+        pop_history,
+        marker='',
+        linewidth=1,
+        alpha=0.9
+    )
+
+    plt.title("mussel model")
+    plt.xlabel("time")
+    plt.ylabel("pop")
+    plt.show()
+
+
+def project_continuous_time_logistic_model_sinusoid(init_pop=20, time_to_run=50, r=0.4, k_0=200, k_1=20, t_p = 10):
+    """
+      dN/dt = rN(1-N/K)
+      N(t+1) = Nt + dN/dt
+             = Nt + rN(1 - N/K)
+      K varies sinusoidally with time
+    """
+
+    current_pop = init_pop
+    pop_history = []
+    for t in range(0, time_to_run):
+        current_k = k_0 + k_1 * math.cos(2 * math.pi * t / t_p)
+        current_pop = current_pop + r * current_pop * (1 - current_pop / current_k)
+        pop_history.append(current_pop)
 
     # Matplotlib work
     plt.style.use('seaborn-darkgrid')
@@ -135,4 +210,6 @@ def mussel_model(init_pop=2, recruitment=2, survival_rate=0.4, time_to_run=50):
 if __name__ == "__main__":
     # one_exponential_growth()
     # two_logistic_map()
-    mussel_model()
+    # mussel_model()
+    # continuous_time_logistic_model()
+    project_continuous_time_logistic_model_sinusoid()
