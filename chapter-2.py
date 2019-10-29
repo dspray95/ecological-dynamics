@@ -27,7 +27,6 @@ def one_exponential_growth(growth_factor=12, time=8):
     print("Q1: r value = {}, time to one million growth factor = {} ".format(r_value, time_to_one_million))
 
 
-
 def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0.2, time_to_run=50):
     """
     Using logistic map:
@@ -46,7 +45,8 @@ def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0
     while b <= b_max + (b_increment / 2):
         pop_history = []
         current_pop = init_pop
-        for t in range(0, time_to_run):
+        pop_history.append(current_pop)
+        for t in range(1, time_to_run):
             next_pop = (b * current_pop) * (1 - c * current_pop)  # Actual equation here
             pop_history.append(next_pop)
             current_pop = next_pop
@@ -56,7 +56,7 @@ def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0
         b += b_increment
 
     # Matplotlib setup
-    plt.style.use('seaborn-darkgrid')
+    plt.style.use('seaborn-paper')
     plt.tight_layout()
 
     plt_num = 0  # keeps track of our current plot
@@ -79,10 +79,11 @@ def two_logistic_map(init_pop=2, b_init=3.1, b_range=0.8, c=0.001, b_increment=0
         plt.xlim(0, time_to_run)
 
         # finally sort the labels out
-        plt.title(b_values[plt_num - 1], loc='left', fontsize=12, fontweight=0)
+        plt.title("b value = {}".format(b_values[plt_num - 1]), loc='left', fontsize=10, fontweight=0)
         plt.xlabel("time")
         plt.ylabel("pop")
 
+    plt.savefig("graphs/chapter-2/q2-logistic-map-{}-{}-{}-{}-{}-{}.png".format(init_pop, b_init, b_range, c, b_increment, time_to_run))
     plt.show()
 
 
@@ -105,21 +106,25 @@ def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_ru
     :param survival_rate: S, a small constant proportion of the population that survives
     :param time_to_run: max(t), the amount of time from 0 the model is to run
     """
+    print(DIVIDER)
+    print("Q6 Mussel Model")
 
     pop_history = []
     cycle_history = []
     current_pop = init_pop
-
-    for t in range(0, time_to_run):
+    # Append population for t = 0 here, as the formula only calculates for pop at t+1, meaning t=0 is never recorded
+    pop_history.append(current_pop)
+    cycle_history.append((2 * recruitment) / (1 - math.pow(survival_rate, 2)) )
+    for t in range(1, time_to_run):
         # Here we calculate the recruitment value based on whether t is odd or even
         # Additionally, we also calculate what the population should be based on the two
         # year cycle shown above
         if t % 2 == 0:
             current_recruitment = 2 * recruitment
-            cycle = (2 * recruitment * survival_rate) / (1 - math.pow(survival_rate, 2))  # 2IS/ 1 - S^2
+            cycle = (2 * recruitment) / (1 - math.pow(survival_rate, 2))  # 2I / 1 - S^2
         else:
             current_recruitment = 0
-            cycle = (2 * recruitment) / (1 - math.pow(survival_rate, 2))  # 2I / 1 - S^2
+            cycle = (2 * recruitment * survival_rate) / (1 - math.pow(survival_rate, 2))  # 2IS/ 1 - S^2
 
         # This is the fluctuating environment calculation X(t+1) = I(t) + S * X(t)
         current_pop = current_recruitment + (survival_rate * current_pop)
@@ -131,8 +136,8 @@ def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_ru
         print("current_pop: {}, cycle: {}".format(non_float_pop, non_float_cycle))
 
     # Matplotlib work
-    plt.style.use('seaborn-darkgrid')
-    plt.tight_layout()
+    plt.style.use("seaborn-paper")
+    # plt.tight_layout()
 
     x = range(0, time_to_run)
     plt.plot(
@@ -140,7 +145,8 @@ def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_ru
         pop_history,
         marker='',
         linewidth=1,
-        alpha=0.9
+        alpha=0.9,
+        label="population"
     )
 
     plt.plot(
@@ -148,20 +154,25 @@ def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_ru
         cycle_history,
         marker='o',
         linestyle="",
-        linewidth=1
+        linewidth=1,
+        label="two-year cycles"
     )
 
-
-    plt.title("mussel model")
+    plt.title("Mussel Model")
     plt.xlabel("time")
     plt.ylabel("pop")
+    plt.legend(loc='upper left', frameon=True)
+    if init_pop == 20 and recruitment == 200 and survival_rate == 0.4 and time_to_run == 50:
+        plt.savefig("graphs/chapter-2/q6-mussel-model-default.png")
+    else:
+        plt.savefig("graphs/chapter-2/q6-mussel-model-{}-{}-{}-{}.png".format(init_pop, recruitment, survival_rate,
+                                                                              time_to_run))
     plt.show()
 
 
 def project_continuous_time_logistic_model_both(init_pop=200, time_to_run=50, r=0.4, k=100,
-                                           sinusoid=False, sinusoid_k0=100, sinusoid_k1=200, sinusoid_tp=10):
+                                                sinusoid=False, sinusoid_k0=100, sinusoid_k1=200, sinusoid_tp=10):
     """"""
-
 
     results = pd.DataFrame({'x': range(0, time_to_run)})
 
@@ -180,7 +191,7 @@ def project_continuous_time_logistic_model_both(init_pop=200, time_to_run=50, r=
         results[set_label] = pop_history
 
     # matplotlib work
-    plt.style.use("seaborn-darkgrid")
+    plt.style.use("seaborn-paper")
     plt.tight_layout()
 
     plt_num = 0  # keeps track of our current plot
@@ -202,7 +213,7 @@ def project_continuous_time_logistic_model_both(init_pop=200, time_to_run=50, r=
         except ValueError:
             largest_value = results.values.max()
 
-        largest_value -= largest_value % -100 # modulo hack to round up to nearest 100
+        largest_value -= largest_value % -100  # modulo hack to round up to nearest 100
         largest_value += largest_value / 10
         plt.ylim(0, largest_value)
         plt.xlim(0, time_to_run)
@@ -227,7 +238,7 @@ def project_continuous_time_logistic_model(init_pop=400, time_to_run=50, r=0.4, 
         pop_history.append(current_pop)
 
     # Matplotlib work
-    plt.style.use('seaborn-darkgrid')
+    plt.style.use('seaborn-paper')
     plt.tight_layout()
 
     plt.plot(
@@ -282,8 +293,9 @@ if __name__ == "__main__":
     two_logistic_map()
     two_logistic_map(init_pop=250)
     six_mussel_model()
+    six_mussel_model(init_pop=800, recruitment=500, survival_rate=0.1)
+
     # continuous_time_logistic_model()
     # project_continuous_time_logistic_model_sinusoid()
     # project_continuous_time_logistic_model()
     # project_continuous_time_logistic_model()
-
