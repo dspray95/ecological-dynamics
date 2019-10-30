@@ -170,24 +170,55 @@ def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_ru
     plt.show()
 
 
-def project_continuous_time_logistic_model_both(init_pop=200, time_to_run=50, r=0.4, k=100,
-                                                sinusoid=False, sinusoid_k0=100, sinusoid_k1=200, sinusoid_tp=10):
+def project_continuous_time_logistic_model(init_pop=20, time_to_run=50, r=0.4, k=300,
+                                           sinusoid=False, sinusoid_k0=100, sinusoid_k1=10, sinusoid_tp=10,
+                                           modify_k_values=False, modify_initial_pop=False, modify_tp_value=False):
     """"""
 
-    results = pd.DataFrame({'x': range(0, time_to_run)})
+    results = pd.DataFrame({'x': np.linspace(0, time_to_run, time_to_run * 2)})
+
+    if sinusoid and modify_initial_pop and sinusoid_k1 + (10 * 100) < init_pop + (10 * 100) and not modify_k_values:
+        raise AttributeError("If modifying the initial population of and using the sinusoid function, the k values"
+                             "must also be increased, otherwise the population will drop below zero")
+    if sinusoid and sinusoid_k0 < sinusoid_k1:
+        raise AttributeError("Sinusoid_k0({}) must be larger than sinusoid_k1({})".format(sinusoid_k0, sinusoid_k1))
 
     for i in range(1, 10):  # 1-10 rather than 0-9 to avoid divide by zero errors
         pop_history = []
         current_k = k
-        current_pop = init_pop
-        for t in range(0, time_to_run):
+
+        if modify_initial_pop:
+            current_pop = init_pop + i * 100
+        else:
+            current_pop = init_pop
+
+        if modify_tp_value:
+            tp = sinusoid_tp + i * 10
+        else:
+            tp = sinusoid_tp
+
+        for t in np.linspace(0, time_to_run, time_to_run * 2):
             if sinusoid:
-                current_k = sinusoid_k0 + sinusoid_k1 * math.cos(2 * math.pi * t / sinusoid_tp)
+                if modify_k_values:
+                    k_0 = sinusoid_k0 + i * 100
+                    k_1 = sinusoid_k1 + i * 100
+                else:
+                    k_0 = sinusoid_k0
+                    k_1 = sinusoid_k1
+
+                current_k = k_0 + k_1 * math.cos(2 * math.pi * t / tp)
             else:
-                current_k = k * i
+                if modify_k_values:
+                    current_k = k + i * 100
+                else:
+                    current_k = k
+
             current_pop = current_pop + r * current_pop * (1 - current_pop / current_k)
+            if current_pop < 0 or current_pop == math.inf:
+                print("Pop dropped to an invalid number, check params!")
             pop_history.append(current_pop)
-        set_label = str(current_k)
+
+        set_label = "i:{}, k:{}".format(i, current_k)
         results[set_label] = pop_history
 
     # matplotlib work
@@ -208,11 +239,7 @@ def project_continuous_time_logistic_model_both(init_pop=200, time_to_run=50, r=
         )
 
         # Make sure the limits are the same across each graph
-        try:
-            largest_value = int(results.values.max())
-        except ValueError:
-            largest_value = results.values.max()
-
+        largest_value = int(results.values.max())
         largest_value -= largest_value % -100  # modulo hack to round up to nearest 100
         largest_value += largest_value / 10
         plt.ylim(0, largest_value)
@@ -222,80 +249,26 @@ def project_continuous_time_logistic_model_both(init_pop=200, time_to_run=50, r=
         # plt.title(results[str(plt_num * k)], loc='left', fontsize=12, fontweight=0)
         plt.xlabel("time")
         plt.ylabel("pop")
-    plt.show()
 
-
-def project_continuous_time_logistic_model(init_pop=400, time_to_run=50, r=0.4, k=300):
-    """
-    dN/dt = rN(1-N/K)
-    N(t+1) = Nt + dN/dt
-           = Nt + rN(1 - N/K)
-    """
-    current_pop = init_pop
-    pop_history = []
-    for i in range(0, time_to_run):
-        current_pop = current_pop + r * current_pop * (1 - current_pop / k)
-        pop_history.append(current_pop)
-
-    # Matplotlib work
-    plt.style.use('seaborn-paper')
-    plt.tight_layout()
-
-    plt.plot(
-        range(0, time_to_run),
-        pop_history,
-        marker='',
-        linewidth=1,
-        alpha=0.9
-    )
-
-    plt.title("mussel model")
-    plt.xlabel("time")
-    plt.ylabel("pop")
-    plt.show()
-
-
-def project_continuous_time_logistic_model_sinusoid(init_pop=20, time_to_run=50, r=0.4, k_0=200, k_1=20, t_p=10):
-    """
-      dN/dt = rN(1-N/K)
-      N(t+1) = Nt + dN/dt
-             = Nt + rN(1 - N/K)
-      K varies sinusoidally with time
-    """
-
-    current_pop = init_pop
-    pop_history = []
-    for t in range(0, time_to_run):
-        current_k = k_0 + k_1 * math.cos(2 * math.pi * t / t_p)
-        current_pop = current_pop + r * current_pop * (1 - current_pop / current_k)
-        pop_history.append(current_pop)
-
-    # Matplotlib work
-    plt.style.use('seaborn-darkgrid')
-    plt.tight_layout()
-
-    plt.plot(
-        range(0, time_to_run),
-        pop_history,
-        marker='',
-        linewidth=1,
-        alpha=0.9
-    )
-
-    plt.title("mussel model")
-    plt.xlabel("time")
-    plt.ylabel("pop")
     plt.show()
 
 
 if __name__ == "__main__":
-    one_exponential_growth()
-    two_logistic_map()
-    two_logistic_map(init_pop=250)
-    six_mussel_model()
-    six_mussel_model(init_pop=800, recruitment=500, survival_rate=0.1)
+    # one_exponential_growth()
+    # two_logistic_map()
+    # two_logistic_map(init_pop=250)
+    # six_mussel_model()
+    # six_mussel_model(init_pop=800, recruitment=500, survival_rate=0.1)
 
     # continuous_time_logistic_model()
     # project_continuous_time_logistic_model_sinusoid()
     # project_continuous_time_logistic_model()
-    # project_continuous_time_logistic_model()
+    project_continuous_time_logistic_model()
+    project_continuous_time_logistic_model(modify_initial_pop=True)
+    project_continuous_time_logistic_model(modify_k_values=True)
+    project_continuous_time_logistic_model(sinusoid=True, modify_initial_pop=True, sinusoid_k0=200, sinusoid_k1=100)
+    project_continuous_time_logistic_model(sinusoid=True, modify_k_values=True)
+    project_continuous_time_logistic_model(sinusoid=True, modify_initial_pop=True, modify_k_values=True)
+    project_continuous_time_logistic_model(sinusoid=True, modify_tp_value=True, sinusoid_k0=200, sinusoid_k1=100)
+    project_continuous_time_logistic_model(sinusoid=True, modify_tp_value=True, sinusoid_k0=10, sinusoid_k1=2)
+
