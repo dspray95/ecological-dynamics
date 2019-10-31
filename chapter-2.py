@@ -172,12 +172,13 @@ def six_mussel_model(init_pop=20, recruitment=200, survival_rate=0.4, time_to_ru
 
 def project_continuous_time_logistic_model(init_pop=20, time_to_run=50, r=0.4, k=300,
                                            sinusoid=False, sinusoid_k0=100, sinusoid_k1=10, sinusoid_tp=10,
-                                           modify_k_values=False, modify_initial_pop=False, modify_tp_value=False):
+                                           modify_k_values=False, modify_initial_pop=False, modify_tp_value=False,
+                                           modify_r_value=False, verbose=True):
     """"""
 
     results = pd.DataFrame({'x': np.linspace(0, time_to_run, time_to_run * 2)})
-
-    if sinusoid and modify_initial_pop and sinusoid_k1 + (10 * 100) < init_pop + (10 * 100) and not modify_k_values:
+    metadata = {}
+    if sinusoid and modify_initial_pop and sinusoid_k1 + 10 * 100 < init_pop + (10 * 100) and not modify_k_values:
         raise AttributeError("If modifying the initial population of and using the sinusoid function, the k values"
                              "must also be increased, otherwise the population will drop below zero")
     if sinusoid and sinusoid_k0 < sinusoid_k1:
@@ -187,21 +188,27 @@ def project_continuous_time_logistic_model(init_pop=20, time_to_run=50, r=0.4, k
         pop_history = []
         current_k = k
 
+        if modify_r_value:
+            current_r = i / 10
+        else:
+            current_r = r
+
         if modify_initial_pop:
-            current_pop = init_pop + i * 100
+            current_pop = i * 100
         else:
             current_pop = init_pop
 
         if modify_tp_value:
-            tp = sinusoid_tp + i * 10
+            tp = i * 10
         else:
             tp = sinusoid_tp
 
+        pop_at_start = current_pop  # This variable is only used to store the starting population in the metadata
         for t in np.linspace(0, time_to_run, time_to_run * 2):
             if sinusoid:
                 if modify_k_values:
-                    k_0 = sinusoid_k0 + i * 100
-                    k_1 = sinusoid_k1 + i * 100
+                    k_0 = i * 100
+                    k_1 = k_0 - i * 75
                 else:
                     k_0 = sinusoid_k0
                     k_1 = sinusoid_k1
@@ -209,16 +216,28 @@ def project_continuous_time_logistic_model(init_pop=20, time_to_run=50, r=0.4, k
                 current_k = k_0 + k_1 * math.cos(2 * math.pi * t / tp)
             else:
                 if modify_k_values:
-                    current_k = k + i * 100
+                    current_k = i * 100
                 else:
                     current_k = k
 
-            current_pop = current_pop + r * current_pop * (1 - current_pop / current_k)
+            current_pop = current_pop + current_r * current_pop * (1 - current_pop / current_k)
             if current_pop < 0 or current_pop == math.inf:
                 print("Pop dropped to an invalid number, check params!")
             pop_history.append(current_pop)
 
-        set_label = "i:{}, k:{}".format(i, current_k)
+        set_label = "{}".format(i)
+        metadata[set_label] = {
+            "modify_pop": modify_initial_pop,
+            "modify_k_values": modify_k_values,
+            "modify_r": modify_r_value,
+            "modify_tp": modify_tp_value,
+            "pop": pop_at_start,
+            "r": current_r,
+            "k": current_k,
+            "k0": sinusoid_k0 + i * 100,
+            "k1": sinusoid_k1 + i * 100,
+            "tp": tp
+        }
         results[set_label] = pop_history
 
     # matplotlib work
@@ -246,29 +265,44 @@ def project_continuous_time_logistic_model(init_pop=20, time_to_run=50, r=0.4, k
         plt.xlim(0, time_to_run)
 
         # finally sort the labels out
-        # plt.title(results[str(plt_num * k)], loc='left', fontsize=12, fontweight=0)
+        title = ""
+        current_metadata = metadata[str(plt_num)]
+        if modify_initial_pop:
+            title += "init_pop: {} ".format(current_metadata["pop"])
+        if modify_r_value:
+            title += "r_value: {} ".format(current_metadata["r"])
+        if modify_k_values and not sinusoid:
+            title += "k_value: {}".format(current_metadata["k"])
+        if modify_k_values and sinusoid:
+            title += "k0: {} k1: {} ".format(current_metadata["k0"], current_metadata["k1"])
+        if modify_tp_value:
+            title += "tp: {} ".format(current_metadata["tp"])
+
+        plt.title(title, loc='left', fontsize=6, fontweight=0)
         plt.xlabel("time")
         plt.ylabel("pop")
 
     plt.show()
 
+    if verbose:
+        print(DIVIDER)
+        print(metadata)
+
 
 if __name__ == "__main__":
-    # one_exponential_growth()
-    # two_logistic_map()
-    # two_logistic_map(init_pop=250)
-    # six_mussel_model()
-    # six_mussel_model(init_pop=800, recruitment=500, survival_rate=0.1)
+    one_exponential_growth()
+    two_logistic_map()
+    two_logistic_map(init_pop=250)
+    six_mussel_model()
+    six_mussel_model(init_pop=800, recruitment=500, survival_rate=0.1)
 
-    # continuous_time_logistic_model()
-    # project_continuous_time_logistic_model_sinusoid()
-    # project_continuous_time_logistic_model()
-    project_continuous_time_logistic_model()
     project_continuous_time_logistic_model(modify_initial_pop=True)
     project_continuous_time_logistic_model(modify_k_values=True)
+    project_continuous_time_logistic_model(modify_r_value=True)
     project_continuous_time_logistic_model(sinusoid=True, modify_initial_pop=True, sinusoid_k0=200, sinusoid_k1=100)
     project_continuous_time_logistic_model(sinusoid=True, modify_k_values=True)
     project_continuous_time_logistic_model(sinusoid=True, modify_initial_pop=True, modify_k_values=True)
     project_continuous_time_logistic_model(sinusoid=True, modify_tp_value=True, sinusoid_k0=200, sinusoid_k1=100)
     project_continuous_time_logistic_model(sinusoid=True, modify_tp_value=True, sinusoid_k0=10, sinusoid_k1=2)
+    project_continuous_time_logistic_model(sinusoid=True, modify_tp_value=True, modify_k_values=True)
 
